@@ -1,7 +1,9 @@
 package cn.itcast.ssm.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,9 +14,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import cn.itcast.ssm.controller.validation.ValidationGroup1;
@@ -66,7 +71,8 @@ public class ItemsController {
 	//value= {ValidationGroup1.class}:指定使用ValidationGroup1分组的校验
 	//@ModelAttribute：指定pojo回显到页面中的request的key
 	public String editItemsSubmit(Model model,HttpServletRequest request,Integer id,
-			@ModelAttribute(value="items") @Validated(value= {ValidationGroup1.class}) ItemsCustom itemsCustom,BindingResult bindingResult) throws Exception {
+			@ModelAttribute(value="items") @Validated(value= {ValidationGroup1.class}) ItemsCustom itemsCustom,BindingResult bindingResult,
+			MultipartFile items_pic) throws Exception {
 //		request.getParameter("id");
 		//获取校验错误信息
 		if(bindingResult.hasErrors()) {
@@ -80,6 +86,23 @@ public class ItemsController {
 			model.addAttribute("allErrors", allErrors);
 			//出错重新到商品修改页面
 			return "items/editItems";
+		}
+		
+		String originalFilename = items_pic.getOriginalFilename();
+		//上传图片
+		if (items_pic!=null && originalFilename!=null && originalFilename.length()>0) {
+			//存储图片的物理路径
+			String pic_path = "C:\\Users\\CB\\Pictures\\Saved Pictures";
+			//上传图片的原始名称
+			//新的图片名称
+			String newFilename = UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."));
+			//新的图片
+			File newFile = new File(pic_path+newFilename);
+			//将内存中的数据写入磁盘
+			items_pic.transferTo(newFile);
+			//将新的图片名称写到itemsCustom中
+			itemsCustom.setPic(newFilename);
+			
 		}
 		//调用service更新商品信息，页面需要将商品信息传到此页面
 		itemsService.updateItems(id, itemsCustom);
@@ -104,6 +127,14 @@ public class ItemsController {
 		model.addAttribute("itemsCustom",itemsCustom);
 		return "items/editItems";
 
+	}
+	
+	//查询商品信息，输出json
+	///itemsView/{id}里边的{id}表示将这个位置的参数传到@PathVariable指定的名称中
+	@RequestMapping("/itemsView/{id}/{type}")
+	public @ResponseBody ItemsCustom itemsView(@PathVariable("id") Integer id,@PathVariable("type") String abc) throws Exception {
+		ItemsCustom itemsCustom = itemsService.findItemsById(id);
+		return itemsCustom;
 	}
 	//批量删除商品信息
 	@RequestMapping("/deleteItems")

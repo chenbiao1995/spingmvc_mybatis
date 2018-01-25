@@ -21,6 +21,12 @@
 	 -->
 	 <context:component-scan base-package="cn.itcast.ssm.controller"></context:component-scan>
 
+	<!-- 静态资源解析
+	包括：js.css.img...
+	 -->
+	 <mvc:resources location="/js/" mapping="/js/**"/>
+	 <mvc:resources location="/img/" mapping="/img/**"/>
+	 
 	<!-- 使用mvc：annotation-driven 代替上边注解映射器和注解适适配器 
 	mvc:annotation-driven默认加载很多的参数绑定的方法，比如json转换解析器就默认加载了，如果使用mvc：annotation-driven不同配置上边的RequestMappingHandlerMapping和org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 	实际开发时使用mvc:annotation-driven-->
@@ -70,4 +76,26 @@
 <!-- 全局异常处理器 
 只要实现CustomExceptionResolver接口就是全局异常处理器-->
 	<bean class="cn.itcast.ssm.exception.CustomExceptionResolver"></bean>
+	<!-- 文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传文件的最大尺寸为5MB -->
+		<property name="maxUploadSize">
+			<value>5242880</value>
+		</property>
+	</bean>
+	<!--拦截器 -->
+<mvc:interceptors>
+	<!--多个拦截器,顺序执行 -->
+	<mvc:interceptor>
+		<!-- /**表示所有url包括子url路径 -->
+		<mvc:mapping path="/**"/>
+		<bean class="cn.itcast.ssm.interceptor.HandlerInterceptor1"></bean>
+	</mvc:interceptor>
+	<mvc:interceptor>
+		<mvc:mapping path="/**"/>
+		<bean class="cn.itcast.ssm.interceptor.HandlerInterceptor2"></bean>
+	</mvc:interceptor>
+</mvc:interceptors>
+	
 </beans>
