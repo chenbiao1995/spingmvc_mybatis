@@ -46,8 +46,6 @@ function editItemsAllSubmit(){
 	<td><input name="itemsList[${status.index} ].price" value="${item.price}"/></td>
 	<td><input name="itemsList[${status.index} ].createtime" value="<fmt:formatDate value="${item.createtime}" pattern="yyyy-MM-dd HH:mm:ss"/>"/></td>
 	<td><input name="itemsList[${status.index} ].detail" value="${item.detail}"/>}</td>
-	
-
 </tr>
 </c:forEach>
 
